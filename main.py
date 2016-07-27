@@ -559,8 +559,7 @@ class SignupHandler(BlogEngine):
             user.put()
             user_id = str(user.key().id())
             self.set_secure_cookie(USER_ID, user_id, None)
-            params = dict(user=user)
-            self.render('blog_roll.html', **params)
+            self.redirect('/')
 
 class MainHandler(BlogEngine):
     def get(self):
