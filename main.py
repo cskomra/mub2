@@ -44,7 +44,6 @@ class Post(db.Model):
     author_name = db.StringProperty(required=True)
     author_id = db.StringProperty(required=True)
     post_id = db.StringProperty()
-    form_id = db.StringProperty(required=True)
     subject = db.StringProperty(required=True)
     content = db.TextProperty(required=True)
     created = db.DateTimeProperty(auto_now_add=True)
@@ -409,9 +408,10 @@ class DeleteHandler(BlogEngine):
             if the_id != "None":
                 the_key = db.Key(the_id)
                 db.delete(the_key)
-                self.render('blog_roll.html')
+                time.sleep(.5)
+                self.redirect('/')
             else:
-                self.render('/')
+                self.redirect('/')
         else:
             self.redirect('/signup')
 
@@ -431,7 +431,6 @@ class NewPostHandler(BlogEngine):
                 post = Post( parent=blog_key(),
                             author_id=self.read_secure_cookie(USER_ID),
                             author_name=user.username,
-                            form_id=FORM_IDS["new_post"],
                             subject=subject,
                             content=content)
                 post_key = self.save_entity(post)
