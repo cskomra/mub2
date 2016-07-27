@@ -17,11 +17,8 @@ JINJA_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
 EMAIL_RE = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
-USER_ID = 'user_id' #was 'usercookie'
+USER_ID = 'user_id'
 SECRET = 'cs9e3_JE!48b'
-FORM_IDS = {
-    "new_post" : "new_post.html"
-}
 
 # GLOBAL FUNCTIONS
 def get_user_id(self):
@@ -213,16 +210,9 @@ class CommentHandler(BlogEngine):
                 comment.post_id = post_id
                 comment.put()
                 time.sleep(.5)
-                comments = Comment.all()
-                comments.ancestor(parent_key)
-                comments.order('-created')
-                params = dict(comments=comments,
-                        subject=parent_post.subject,
-                        content=parent_post.content,
-                        post_id=post_id)
-                self.render("post.html", **params)
+                self.redirect('/open?id=%s' % post_id)
             else:
-                error = "Comment may not be blank."
+                error = "But you didn't type anything!"
                 params = dict(error=error)
                 self.render("new_comment.html", **params)
         else:
@@ -575,10 +565,6 @@ class MainHandler(BlogEngine):
             msg = "Please Signup or Login to Post!"
             params = dict(posts=posts, msg=msg)
             self.render('blog_roll.html', **params)
-
-# class MainHandler(webapp2.RequestHandler):
-#     def get(self):
-#         self.response.write('Hello world!')
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),

@@ -22,16 +22,12 @@
     <form action="" method="post">
         <div class="row">
             <div class="col-md-12 form_title">
-                {% if created %}
-                    <h3>Comment</h3>
-                {% else %}
-                    <h3>New Comment</h3>
-                {% endif %}
+                <h3>New Comment</h3>
             </div>
         </div>
             <div class="row">
                 <div class="col-md-2 field_label"><label for="content">Comment</label></div>
-                <div class="col-md-7 field"><textarea name="content">{{content}}</textarea></div>
+                <div class="col-md-7 field"><textarea name="content" placeholder="required" rows="5" cols="50" autofocus>{{content}}</textarea></div>
                 <div class="col-md-3 error">{{error}}</div>
             </div>
             <div class="row form_actions">
@@ -40,15 +36,16 @@
                     <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
                 </div>
             </div>
-        <div class="row">
-            <div class="col-md-12 doc_info">
-                Created by:  {{author_name}} <br>
-                {% if created %}
-                    Created Date:  {{created}} <br>
-                {% endif %}
-                {% if modified %}
-                    Modified Date:  {{modified}} <br>
-                {% endif %}
+        <div class="row doc_info">
+            <div class="col-sm-12">
+                <div class="row created_by">
+                    <div class="col-sm-2 field_label">
+                        Created by:
+                    </div>
+                    <div class="col-sm-10 field">
+                        {{username}}
+                    </div>
+                </div>
             </div>
         </div>
     </form>
