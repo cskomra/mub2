@@ -1,0 +1,55 @@
+<!-- template: new_comment (and edit comment)-->
+{% extends "base.html" %}
+
+{% block nav %}
+    <ul class="nav navbar-nav">
+        <li><a href="/">Home</a></li>
+    </ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        {% if username %}
+            <a href="\logout">Log Out</a>
+        {% else %}
+            <a href="\login">Log In</a> |
+            <a href="\signup">Sign Up</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        <div class="row">
+            <div class="col-md-12 form_title">
+                        {% if created %}
+                            <h3>Comment</h3>
+                        {% else %}
+                            <h3>New Comment</h3>
+                        {% endif %}
+            </div>
+        </div>
+            <div class="row">
+                <div class="col-md-2 field_label"><label for="content">Comment</label></div>
+                <div class="col-md-7 field"><textarea name="content">{{content}}</textarea></div>
+                <div class="col-md-3 error">{{error}}</div>
+            </div>
+            <div class="row form_actions">
+                <div class="col-md-12">
+                    <input type="submit" class="btn" name="submit" value="Submit">
+                    <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
+                </div>
+            </div>
+        <div class="row">
+            <div class="col-md-12 doc_info">
+                Created by:  {{author_name}} <br>
+                {% if created %}
+                    Created Date:  {{created}} <br>
+                {% endif %}
+                {% if modified %}
+                    Modified Date:  {{modified}} <br>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -1,0 +1,60 @@
+<!-- template: blog_roll -->
+{% extends "base.html" %}
+
+{% block nav %}
+    <ul class="nav navbar-nav">
+        <li><a href='/'>Home</a></li>
+    </ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        {% if username %}
+            <a href='\logout'>Log Out</a>
+        {% else %}
+            <a href='\login'>Log In</a> |
+            <a href='\signup'>Sign Up</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="row view_title">
+        <h2>Blog Posts</h2>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            {% if username %}
+                <a href='\newpost'>New Post</a><br>
+            {% else %}
+                <div>{{msg}}</div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- blog_roll display posts_viewtemplate <br> -->
+    <form method="post">
+        {% for post in posts %}
+            <!-- TODO: define view-borders & view-action styles -->
+            <div class="row view">
+                <div class="col-sm-2">
+                    <span>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{post.author_name}}
+                    </span>
+                    <span>
+                        {% if username == post.author_name %}
+                            <a href="/delete?id={{post.post_id}}">
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true">
+                            </a>delete
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="col-sm-4">
+                    <a href="/open?id={{post.post_id}}">{{post.subject}}</a>
+                </div>
+                <div class="col-sm-5">
+                    {{post.content}}
+                </div>
+            </div>
+        {% endfor %}
+    </form>
+{% endblock %}

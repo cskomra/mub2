@@ -1,0 +1,96 @@
+<!-- template: post -->
+{% extends "base.html" %}
+
+{% block nav %}
+    <ul class="nav navbar-nav">
+        <li><a href='/'>Home</a></li>
+    </ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        {% if username %}
+            <a href='\logout'>Log Out</a>
+        {% else %}
+            <a href='\login'>Log In</a> |
+            <a href='\signup'>Sign Up</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <h3>Post</h3>
+    <div class="row">
+        <div class='col-sm-2 field_label'>Subject:</div>
+        <div class='col-sm-6 field'>{{subject}}</div>
+    </div>
+    <div class="row">
+        <div class='col-sm-2 field_label'>Content:</div>
+        <div class='col-sm-6 field'>{{content}}</div>
+    </div>
+
+    <div class="row form_actions">
+        <div class="col-sm-5">
+            {%if is_editor %}
+                <!-- Can edit, but not like -->
+                <input type="button" class="btn" value="Edit" onClick="window.location='/edit?id={{post_id}}'">
+            {% endif %}
+
+            {% if username %}
+                <!-- is logged in and can "like" and comment -->
+                <input type="button" class="btn" value="Comment" onClick="window.location='/comment?id={{post_id}}'">
+            {% endif %}
+
+            <input type="button" class="btn" value="Cancel" onClick="window.location='/'">
+        </div>
+        {% if username and (username != author_name) %}
+                <div class="row like">
+                    <div class="col-sm-1" style="text-align:right;" title="{{likers}}">
+                        {{like_count}}
+                    </div>
+                    {% if username in likers %}
+                        You like this!
+                    {% else %}
+                        <div class="col-sm-2">
+                            <a href="/like?id={{post_id}}">
+                                <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+                                I Like It!</a>
+                        </div>
+                    {% endif %}
+                </div>
+        {% endif %}
+    </div>
+    <div class="row">
+        <div class="col-md-12 doc_info">
+            Created by:  {{author_name}} <br>
+            Created Date:  {{created}} <br>
+            Modified Date:  {{modified}} <br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 comment_roll">
+            {% for c in comments %}
+                <!-- TODO: define view-borders & view-action styles -->
+                <div class="row view">
+                    <div class="col-sm-4">
+                        <span>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true">{{c.author_name}}</span>
+                        </span>
+                        <span>
+                            {% if username == c.author_name %}
+                                <a href="/delete?id={{c.comment_id}}">
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                                </a>delete
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="col-sm-8">
+                        <a href="/open?id={{c.comment_id}}">{{c.content}}</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</form>
+{% endblock %}

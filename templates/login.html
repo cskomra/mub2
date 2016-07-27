@@ -1,0 +1,31 @@
+<!-- template: login -->
+{% extends "base.html" %}
+
+{% block nav %}
+<ul class="nav navbar-nav">
+    <ul class="nav navbar-nav">
+        <li><a href='/'>Home</a></li>
+    </ul>
+</ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        <a href='\signup'>Sign Up</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+<form action="" method="post">
+	<fieldset class="form">
+		<h3>User Sign In</h3>
+		<p><label for="username">User Name</label>
+			<input type="text" name="username" value="{{username}}" placeholder="required"><span class="error">{{error_username}}</span>
+		<p><label for="password">Password</label>
+			<input type="password" name="password" value="" placeholder="required"><span class="error">{{error_password}}</span>
+	</fieldset>
+	<fieldset class="form-actions">
+		<input type="submit" class="btn" name="submit" value="Submit">
+	</fieldset>
+</form>
+{% endblock content %}

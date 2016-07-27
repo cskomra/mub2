@@ -1,0 +1,22 @@
+<!-- template: signup -->
+{% extends "base.html" %}
+
+{% block nav %}
+<ul class="nav navbar-nav">
+    {% for link, title in context.menu.nli %}
+        <li><a href={{ link }}>{{ title }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        <a href='\login'>Log In</a>
+    </div>
+{% endblock %}
+
+{% block content %}
+
+user = {{user}}
+
+{% endblock %}

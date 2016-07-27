@@ -1,0 +1,93 @@
+<!-- template: base -->
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Blog</title>
+
+        <link href="https://fonts.googleapis.com/css?family=Lato:100,300" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+        <!--<link rel="stylesheet" href="css/style.css">-->
+        <style>
+            div, td {
+                border: 1px solid red;
+            }
+
+            body {
+                /*yellow*/
+                background-color: #F2E394;
+                color: #8C4646;
+            }
+
+            .navbar {
+                /*red*/
+                background-color: #D96459;
+            }
+            .positioner {
+                position: relative;
+            }
+            .container {
+                position: absolute;
+                top: 50px;
+                width: 100%;
+            }
+            .view {
+                padding: 3px;
+                border-color: #8C4646;
+            }
+            .glyphicon-trash {
+                padding: 5px;
+            }
+            .auth_menu {
+                text-align: right;
+            }
+            .form_actions {
+                padding: 15px 0;
+            }
+            .t_label {
+                padding-right: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="positioner">
+            <nav class="navbar navbar-inverse navbar-fixed-top">
+                <div class="container-fluid">
+                    <div class="navbar-header">
+                        <span class="navbar-brand">
+                            Welcome {{username}}
+                        </span>
+                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#Navbar">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        </button>
+                    </div>
+                    <div class="collapse navbar-collapse" id="Navbar">
+                        {% block nav %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </nav>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12 menu">
+                        {% block auth_menu %}
+                        {% endblock %}
+                    </div>
+                </div>
+                <div class="row">
+                     <div class="col-md-12 blog_body">
+                        {% block content %}
+                        {% endblock %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

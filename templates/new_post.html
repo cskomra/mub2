@@ -1,0 +1,57 @@
+<!-- template: new_post -->
+{% extends "base.html" %}
+
+{% block nav %}
+    <ul class="nav navbar-nav">
+        <li><a href='/'>Home</a></li>
+    </ul>
+{% endblock %}
+
+{% block auth_menu %}
+    <div class="auth_menu">
+        {% if username %}
+            <a href='\logout'>Log Out</a>
+        {% else %}
+            <a href='\login'>Log In</a> |
+            <a href='\signup'>Sign Up</a>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block content %}
+    <form action="" method="post">
+        <fieldset class="form">
+            {% if created %}
+                <h3>Post</h3>
+            {% else %}
+                <h3>New Post</h3>
+            {% endif %}
+            <table>
+                <tr>
+                    <td class='t_label'><label for="subject">Subject</label></td>
+                    <td class='t_field'><input type="text" name="subject" value="{{subject}}" placeholder="required"></td>
+                    <td class='t_error'>{{error}}</td>
+                </tr>
+                <tr>
+                    <td class='t_label'><label for="content">Content</label></td>
+                    <td class='t_field'><textarea name="content">{{content}}</textarea></td>
+                </tr>
+            </table>
+        </fieldset>
+    <div class="form_actions">
+        <input type="submit" class="btn" name="submit" value="Submit">
+        <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
+    </div>
+    <div class="row">
+        <div class="col-md-12 doc_info">
+            Created by:  {{username}} <br>
+            {% if created %}
+                Created Date:  {{created}} <br>
+            {% endif %}
+            {% if modified %}
+                Modified Date:  {{modified}} <br>
+            {% endif %}
+        </div>
+    </div>
+</form>
+{% endblock %}
