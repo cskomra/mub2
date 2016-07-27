@@ -403,7 +403,6 @@ class DeleteHandler(BlogEngine):
             auth_error = False
 
         if not auth_error:
-            #get post_id from url
             the_id = self.request.get('id')
             if the_id != "None":
                 the_key = db.Key(the_id)
