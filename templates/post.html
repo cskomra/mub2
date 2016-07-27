@@ -3,7 +3,7 @@
 
 {% block nav %}
     <ul class="nav navbar-nav">
-        <li><a href='/'>Home</a></li>
+        <li><a href='/'><span class="glyphicon glyphicon-home" aria-hidden="true"><span style="font-family:Lato;"> Home</span></span></a></li>
     </ul>
 {% endblock %}
 
@@ -19,12 +19,13 @@
 {% endblock %}
 
 {% block content %}
-    <h3>Post</h3>
-    <div class="row">
-        <div class='col-sm-2 field_label'>Subject:</div>
-        <div class='col-sm-6 field'>{{subject}}</div>
+    <div class="row page_title">
+        <div class="col-md-12">
+            <h2>{{subject}}</h2>
+        </div>
     </div>
-    <div class="row">
+
+    <div class="row page_content">
         <div class='col-sm-2 field_label'>Content:</div>
         <div class='col-sm-6 field'>{{content}}</div>
     </div>
@@ -44,43 +45,71 @@
             <input type="button" class="btn" value="Cancel" onClick="window.location='/'">
         </div>
         {% if username and (username != author_name) %}
-                <div class="row like">
-                    <div class="col-sm-1" style="text-align:right;" title="{{likers}}">
-                        {{like_count}}
-                    </div>
-                    {% if username in likers %}
-                        You like this!
-                    {% else %}
-                        <div class="col-sm-2">
-                            <a href="/like?id={{post_id}}">
-                                <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
-                                I Like It!</a>
-                        </div>
-                    {% endif %}
+        <div class="row like">
+            <div class="col-sm-1" style="text-align:right;" title="{{likers}}">
+                {{like_count}}
+            </div>
+            {% if username in likers %}
+                You like this!
+            {% else %}
+                <div class="col-sm-2">
+                    <a href="/like?id={{post_id}}">
+                        <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"></span>
+                        I Like It!</a>
                 </div>
+            {% endif %}
+        </div>
         {% endif %}
     </div>
-    <div class="row">
-        <div class="col-md-12 doc_info">
-            Created by:  {{author_name}} <br>
-            Created Date:  {{created}} <br>
-            Modified Date:  {{modified}} <br>
+    <div class="row doc_info">
+        <div class="col-sm-12">
+            <div class="row created_by">
+                <div class="col-sm-2 field_label">
+                    Created by:
+                </div>
+                <div class="col-sm-10 field">
+                    {{author_name}}
+                </div>
+            </div>
+            <div class="row created_date">
+                <div class="col-sm-2 field_label">
+                    Created Date:
+                </div>
+                <div class="col-sm-10 field">
+                    {{created}}
+                </div>
+            </div>
+            <div class="row modified_date">
+                <div class="col-sm-2 field_label">
+                    Modified Date:
+                </div>
+                <div class="col-sm-10 field">
+                    {{modified}}
+                </div>
+            </div>
         </div>
     </div>
     <div class="row">
         <div class="col-md-12 comment_roll">
+            {% if comments %}
+                <div class="row view_subtitle">
+                    <div class="col-sm-12">
+                        <h3>Comments</h3>
+                    </div>
+                </div>
+            {% endif %}
             {% for c in comments %}
                 <!-- TODO: define view-borders & view-action styles -->
                 <div class="row view">
                     <div class="col-sm-4">
                         <span>
-                            <span class="glyphicon glyphicon-user" aria-hidden="true">{{c.author_name}}</span>
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{c.author_name}}
                         </span>
                         <span>
                             {% if username == c.author_name %}
                                 <a href="/delete?id={{c.comment_id}}">
-                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
-                                </a>delete
+                                    <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>delete
+                                </a>
                             {% endif %}
                         </span>
                     </div>

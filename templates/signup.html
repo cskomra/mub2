@@ -2,11 +2,9 @@
 {% extends "base.html" %}
 
 {% block nav %}
-<ul class="nav navbar-nav">
     <ul class="nav navbar-nav">
-        <li><a href='/'>Home</a></li>
+        <li><a href='/'><span class="glyphicon glyphicon-home" aria-hidden="true"><span style="font-family:Lato;"> Home</span></span></a></li>
     </ul>
-</ul>
 {% endblock %}
 
 {% block auth_menu %}
@@ -18,33 +16,60 @@
 {% block content %}
 
 <form action="" method="post">
-    <fieldset class="form">
-        <h3>New User Sign Up</h3>
-        <table>
-            <tr>
-                <td class='t_label'><label for="username">User Name</label></td>
-                <td class='t_field'><input type="text" name="username" value="{{username}}" placeholder="required"></td>
-                <td class='t_error'>{{error_username}} {{error_username_exists}}</td>
-            </tr>
-            <tr>
-                <td class='t_label'><label for="password">Password</label></td>
-                <td class='t_field'><input type="password" name="password" value="{{password}}" placeholder="required"></td>
-                <td class='t_error'>{{error_password}}</td>
-            </tr>
-            <tr>
-                <td class='t_label'><label for="verify">Confirm Password</label></td>
-                <td class='t_field'><input type="password" name="verify" value="" placeholder="required"></td>
-                <td class='t_error'>{{error_verify}}</span></td>
-            </tr>
-            <tr>
-                <td class='t_label'><label for="email">Email</label></td>
-                <td class='t_field'><input type="text" name="email" value="{{email}}" placeholder="optional"></td>
-                <td class='t_error'>{{error_email}}</td>
-            </tr>
-        </table>
-    </fieldset>
-    <div class="form_actions">
-        <input type="submit" class="btn" name="submit" value="Submit">
+    <div class="row">
+        <div class="col-md-12 form_title">
+            <h3>New User Sign Up</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="username">User Name</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="text" name="username" value="{{username}}" placeholder="required">
+        </div>
+        <div class="col-md-3 error">
+            {{error_username}} {{error_username_exists}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="password">Password</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="password" name="password" value="{{password}}" placeholder="required">
+        </div>
+        <div class="col-md-3 error">
+            {{error_password}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="verify">Confirm Password</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="password" name="verify" value="" placeholder="required">
+        </div>
+        <div class="col-md-3 error">
+            {{error_verify}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="email">Email</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="text" name="email" value="{{email}}" placeholder="optional">
+        </div>
+        <div class="col-md-3 error">
+            {{error_email}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form_actions">
+            <input type="submit" class="btn" name="submit" value="Submit">
+            <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
+        </div>
     </div>
 </form>
 
