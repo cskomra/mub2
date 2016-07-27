@@ -3,7 +3,7 @@
 
 {% block nav %}
     <ul class="nav navbar-nav">
-        <li><a href='/'>Home</a></li>
+        <li><a href='/'><span class="glyphicon glyphicon-home" aria-hidden="true"><span style="font-family:Lato;"> Home</span></span></a></li>
     </ul>
 {% endblock %}
 
@@ -23,7 +23,7 @@
         <h2>Blog Posts</h2>
     </div>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-12 view_menu">
             {% if username %}
                 <a href='\newpost'>New Post</a><br>
             {% else %}
@@ -38,13 +38,12 @@
             <div class="row view">
                 <div class="col-sm-2">
                     <span>
-                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{post.author_name}}
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{post.author_name}}
                     </span>
                     <span>
                         {% if username == post.author_name %}
                             <a href="/delete?id={{post.post_id}}">
-                                <span class="glyphicon glyphicon-trash" aria-hidden="true">
-                            </a>delete
+                                <span class="glyphicon glyphicon-trash" aria-hidden="true">delete</a>
                         {% endif %}
                     </span>
                 </div>
