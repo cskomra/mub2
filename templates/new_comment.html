@@ -3,7 +3,7 @@
 
 {% block nav %}
     <ul class="nav navbar-nav">
-        <li><a href="/">Home</a></li>
+        <li><a href='/'><span class="glyphicon glyphicon-home" aria-hidden="true"><span style="font-family:Lato;"> Home</span></span></a></li>
     </ul>
 {% endblock %}
 
@@ -22,11 +22,11 @@
     <form action="" method="post">
         <div class="row">
             <div class="col-md-12 form_title">
-                        {% if created %}
-                            <h3>Comment</h3>
-                        {% else %}
-                            <h3>New Comment</h3>
-                        {% endif %}
+                {% if created %}
+                    <h3>Comment</h3>
+                {% else %}
+                    <h3>New Comment</h3>
+                {% endif %}
             </div>
         </div>
             <div class="row">

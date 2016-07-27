@@ -44,10 +44,11 @@
 
             <input type="button" class="btn" value="Cancel" onClick="window.location='/'">
         </div>
+
         {% if username and (username != author_name) %}
         <div class="row like">
-            <div class="col-sm-1" style="text-align:right;" title="{{likers}}">
-                {{like_count}}
+            <div class="col-sm-1" title="{{likers}}">
+                Likes: {{like_count}}
             </div>
             {% if username in likers %}
                 You like this!
