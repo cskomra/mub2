@@ -10,6 +10,7 @@ import time
 
 from google.appengine.ext import db
 
+
 # GLOBAL CONSTANTS
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 JINJA_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
@@ -19,28 +20,39 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
 USER_ID = 'user_id'
 SECRET = 'cs9e3_JE!48b'
+COOKIE_LIFE = 0
+
 
 # GLOBAL FUNCTIONS
 def get_user_id(self):
+
     # If logged in, returns user's cookie
     return self.read_secure_cookie(USER_ID)
 
+
 def blog_key(name='default'):
+
     # Facilitiates multiple blogs
     return db.Key.from_path('Blog', name)
 
+
 def render_str(template, **params):
+
     # Renders given template with given parameters
     tmp = JINJA_ENV.get_template(template)
     return tmp.render(params)
 
+
 # DATA OBJECT DEFINITIONS
 class User(db.Model):
+
     username = db.StringProperty(required=True)
     pass_hash = db.StringProperty(required=True)
     email = db.StringProperty()
 
+
 class Post(db.Model):
+
     author_name = db.StringProperty(required=True)
     author_id = db.StringProperty(required=True)
     post_id = db.StringProperty()
@@ -49,7 +61,9 @@ class Post(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     modified = db.DateTimeProperty(auto_now=True)
 
+
 class Comment(db.Model):
+
     author_name = db.StringProperty(required=True)
     author_id = db.StringProperty(required=True)
     comment_id = db.StringProperty()
@@ -57,11 +71,15 @@ class Comment(db.Model):
     created = db.DateTimeProperty(auto_now_add=True)
     modified = db.DateTimeProperty(auto_now=True)
 
+
 class Like(db.Model):
+
     liker = db.StringProperty(required=True)
+
 
 # ENGINES
 class SecurityEngine(object):
+
     def make_secure_val(self, val):
         return '%s|%s' % (val, hmac.new(SECRET, val).hexdigest())
 
@@ -133,7 +151,6 @@ class SecurityEngine(object):
                                         user.pass_hash)
 
     def is_authorized(self):
-        # to check if authorized, set user = is_authorized
         authorized = False
         username = self.read_secure_cookie(USER_ID)
         if username:
@@ -141,6 +158,7 @@ class SecurityEngine(object):
         if self.get_user(username):
             authorized = True
         return authorized
+
 
 class BlogEngine(webapp2.RequestHandler, SecurityEngine):
 
@@ -165,15 +183,16 @@ class BlogEngine(webapp2.RequestHandler, SecurityEngine):
     def get_entity(self, entity_key):
         return db.get(entity_key)
 
+
 # HANDLERS
 class LikeHandler(BlogEngine):
+
     def get(self):
-        # if username != author_name & not is_liker
         user = self.get_user_by_uid()
         if user:
             likable_id = self.request.get("id")
             parent_key = db.Key(likable_id)
-            #create new like as child to likable parent
+            #create new Like as child to likable parent
             like = Like(parent=parent_key,
                         liker = user.username)
             like.put()
@@ -181,12 +200,13 @@ class LikeHandler(BlogEngine):
         else:
             self.redirect('/')
 
+
 class CommentHandler(BlogEngine):
+
     def get(self):
         user = self.get_user_by_uid()
         if user:
             post_id = self.request.get("id")
-            #self.write(post_id)
             self.render("new_comment.html", post_id=post_id)
         else:
             self.redirect('/')
@@ -217,16 +237,14 @@ class CommentHandler(BlogEngine):
         else:
             self.redirect('/')
 
+
 class EditHandler(BlogEngine):
 
     def get(self):
         the_id = self.request.get('id')
         user = self.get_user_by_uid()
-        # self.write("here")
-        #check is_authorized
         if user:
             if self.is_authorized():
-                # get the entity and render it's params w/ correct form
                 if the_id != "None":
                     the_key = db.Key(the_id)
                     the_entity = self.get_entity(the_key)
@@ -249,24 +267,23 @@ class EditHandler(BlogEngine):
                                 subject = the_entity.subject
                                 params["subject"] = subject
                                 form = "new_post.html"
-                                # self.render("new_post.html", **params)
 
                             # Edit a Comment
                             elif the_entity.kind() == "Comment":
                                 form = "new_comment.html"
 
                             else:
-                                self.write("Entity kind needs handler")
+                                self.write("Error: Entity kind needs handler")
 
                             self.render(form, **params)
                         else:
-                            self.write("Not an editor.")
+                            self.write("Error: Not an editor.")
                     else:
-                        self.write("Don't have the entity")
+                        self.write("Error: Don't have the entity")
                 else:
-                    self.write("the_id = None")
+                    self.write("Error: the_id = None")
             else:
-                self.write("No authorized")
+                self.write("Error: Not authorized")
         else:
             # Error: No User
             self.redirect('/login')
@@ -287,7 +304,8 @@ class EditHandler(BlogEngine):
                         content = self.request.get("content")
                         the_entity.content = content
                         kind = the_entity.kind()
-                        # handle Post
+
+                        # POST
                         if kind == "Post":
                             subject = self.request.get("subject")
                             the_entity.subject = subject
@@ -301,7 +319,7 @@ class EditHandler(BlogEngine):
                                 params = dict(subject=subject, content=content, error=error)
                                 self.render("new_post.html", **params)
 
-                        # handle Comment
+                        # COMMENT
                         elif kind == "Comment":
                             if content.strip() != "":
                                 the_entity.put()
@@ -314,15 +332,17 @@ class EditHandler(BlogEngine):
                                 self.render("new_comment.html", **params)
 
                         else:
-                            self.write("Entity kind needs a handler")
+                            self.write("Error: Entity kind needs a handler")
                     else:
-                        self.write("Not an Editor.")
+                        self.write("Error: Not an Editor.")
                 else:
-                    self.write("Don't have the entity")
+                    self.write("Error: Don't have the entity")
             else:
-                self.write("the_id = None")
+                self.write("Error: the_id = None")
+
 
 class OpenHandler(BlogEngine):
+
     def get(self):
         user = self.get_user_by_uid()
         the_id = self.request.get("id")
@@ -333,7 +353,7 @@ class OpenHandler(BlogEngine):
             author_name = the_entity.author_name
 
             params = dict()
-            # set params common to all Models (so far)
+            # get/set params common to all Models
             params['content'] = the_entity.content
             params['author_name'] = author_name
             params['created'] = the_entity.created
@@ -364,16 +384,11 @@ class OpenHandler(BlogEngine):
                     likers.append(str(like.liker))
                 params["likers"] = likers
                 params["like_count"] = like_count
-
                 form = "post.html"
-
             # COMMENT
             elif the_entity.kind() == "Comment":
-                # self.write(the_entity.content)
-
                 params["comment_id"] = the_entity.comment_id
                 form = "comment.html"
-
             else:
                 form = "blog_roll.html"
 
@@ -382,20 +397,10 @@ class OpenHandler(BlogEngine):
             self.redirect('/')
 
 
-    def post(self):
-        #get the kind and redirect accordingly
-        # self.write("Save edited post or comment")
-        the_id = self.request.get("id")
-        if the_id != "None":
-            the_key = db.Key(the_id)
-            the_entity = db.get(the_key)
-            kind = the_entity.kind()
-            self.write(kind)
-
 class DeleteHandler(BlogEngine):
+
     def get(self):
         auth_error = True
-
         if self.read_secure_cookie(USER_ID):
             auth_error = False
 
@@ -415,7 +420,9 @@ class DeleteHandler(BlogEngine):
         else:
             self.redirect('/signup')
 
+
 class NewPostHandler(BlogEngine):
+
     def get(self):
         if self.read_secure_cookie(USER_ID):
             self.render("new_post.html")
@@ -445,7 +452,9 @@ class NewPostHandler(BlogEngine):
         else:
             self.redirect('/')
 
+
 class LoginHandler(BlogEngine):
+
     def get(self):
         self.render("login.html")
 
@@ -456,7 +465,6 @@ class LoginHandler(BlogEngine):
 
         params = dict()
         if self.get_user(username):
-            # tests for valid password and password match
             if self.user_auth(username, password):
                 auth_error = False
             else:
@@ -466,8 +474,6 @@ class LoginHandler(BlogEngine):
             auth_error = True
             params['error_username'] = 'User Does Not Exist'
 
-        # if there is an error re-render signup page
-        # else render the welcome page
         if auth_error:
             self.render("login.html", **params)
         else:
@@ -479,10 +485,13 @@ class LoginHandler(BlogEngine):
             self.set_secure_cookie(USER_ID, user_id, None)
             self.redirect('/')
 
+
 class LogoutHandler(BlogEngine):
+
     def get(self):
         self.set_secure_cookie(USER_ID, '', None)
         self.redirect('/login')
+
 
 class SignupHandler(BlogEngine):
 
@@ -499,23 +508,17 @@ class SignupHandler(BlogEngine):
             return True
 
     def get(self):
-        #set current user context
         self.render('signup.html')
 
     def post(self):
-        # initialize local variables
         error = False
-
-        # get user input
         username = self.request.get('username')
         password = self.request.get('password')
         verify = self.request.get('verify')
         email = self.request.get('email')
 
-        #collect params to send with template
         params = dict(username=username, password=password, email=email)
 
-        # validate user input
         if self.get_user(username):
             error = True
             params['error_username_exists'] = "User already exists."
@@ -546,7 +549,9 @@ class SignupHandler(BlogEngine):
             self.set_secure_cookie(USER_ID, user_id, None)
             self.redirect('/')
 
+
 class MainHandler(BlogEngine):
+
     def get(self):
         user = None
         if self.get_user_by_uid():
@@ -560,6 +565,7 @@ class MainHandler(BlogEngine):
             msg = "Please Signup or Login to Post!"
             params = dict(posts=posts, msg=msg)
             self.render('blog_roll.html', **params)
+
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler),
