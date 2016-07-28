@@ -38,20 +38,22 @@
             <div class="row view">
                 <div class="col-sm-2">
                     <span>
-                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span>{{post.author_name}}
+                        <span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{post.author_name}}
                     </span>
-                    <span>
-                        {% if username == post.author_name %}
-                            <a href="/delete?id={{post.post_id}}">
-                                <span class="glyphicon glyphicon-trash" aria-hidden="true">delete</a>
-                        {% endif %}
-                    </span>
+
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <a href="/open?id={{post.post_id}}">{{post.subject}}</a>
                 </div>
                 <div class="col-sm-5">
                     {{post.content}}
+                </div>
+                <div class="col-sm-2">
+                    {% if username == post.author_name %}
+                        <a href="/delete?id={{post.post_id}}">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true">delete
+                        </a>
+                    {% endif %}
                 </div>
             </div>
         {% endfor %}

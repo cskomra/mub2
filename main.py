@@ -477,10 +477,7 @@ class LoginHandler(BlogEngine):
                                username=username).get()
             user_id = str(user.key().id())
             self.set_secure_cookie(USER_ID, user_id, None)
-            posts = Post.all()
-            posts.order('-created')
-            params = dict(username=username, posts=posts)
-            self.render('blog_roll.html', **params)
+            self.redirect('/')
 
 class LogoutHandler(BlogEngine):
     def get(self):
