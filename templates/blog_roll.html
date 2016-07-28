@@ -29,14 +29,12 @@
             {% if username %}
                 <a href='\newpost'>New Post</a><br>
             {% else %}
-                <div>{{msg}}</div>
+                <div class="view_msg">{{msg}}</div>
             {% endif %}
         </div>
     </div>
-    <!-- blog_roll display posts_viewtemplate <br> -->
     <form method="post">
         {% for post in posts %}
-            <!-- TODO: define view-borders & view-action styles -->
             <div class="row view">
                 <div class="col-sm-2">
                     <span>

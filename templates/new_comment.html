@@ -25,17 +25,18 @@
                 <h3>New Comment</h3>
             </div>
         </div>
-            <div class="row">
-                <div class="col-md-2 field_label"><label for="content">Comment</label></div>
-                <div class="col-md-7 field"><textarea name="content" placeholder="required" rows="5" cols="50" autofocus>{{content}}</textarea></div>
-                <div class="col-md-3 error">{{error}}</div>
+
+        <div class="row">
+            <div class="col-md-2 field_label"><label for="content">Comment</label></div>
+            <div class="col-md-7 field"><textarea name="content" placeholder="required" rows="5" cols="50" autofocus>{{content}}</textarea></div>
+            <div class="col-md-3 error">{{error}}</div>
+        </div>
+        <div class="row form_actions">
+            <div class="col-md-12">
+                <input type="submit" class="btn" name="submit" value="Submit">
+                <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
             </div>
-            <div class="row form_actions">
-                <div class="col-md-12">
-                    <input type="submit" class="btn" name="submit" value="Submit">
-                    <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
-                </div>
-            </div>
+        </div>
         <div class="row doc_info">
             <div class="col-sm-12">
                 <div class="row created_by">

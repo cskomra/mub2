@@ -268,7 +268,8 @@ class EditHandler(BlogEngine):
             else:
                 self.write("No authorized")
         else:
-            self.write("Error: No User (EditHandler)")
+            # Error: No User
+            self.redirect('/login')
 
     def post(self):
         the_id = self.request.get('id')
@@ -302,11 +303,11 @@ class EditHandler(BlogEngine):
 
                         # handle Comment
                         elif kind == "Comment":
-                            self.write(kind)
                             if content.strip() != "":
                                 the_entity.put()
+                                post_id = the_entity.key().parent()
                                 time.sleep(.5)
-                                self.redirect("/")
+                                self.redirect("/open?id=%s" % str(post_id))
                             else:
                                 error = "Please include content."
                                 params = dict(content=content, error=error)
@@ -453,8 +454,7 @@ class LoginHandler(BlogEngine):
         username = self.request.get('username')
         password = self.request.get('password')
 
-        params = dict(username=username)
-
+        params = dict()
         if self.get_user(username):
             # tests for valid password and password match
             if self.user_auth(username, password):

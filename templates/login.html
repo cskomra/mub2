@@ -15,15 +15,36 @@
 
 {% block content %}
 <form action="" method="post">
-	<fieldset class="form">
-		<h3>User Sign In</h3>
-		<p><label for="username">User Name</label>
-			<input type="text" name="username" value="{{username}}" placeholder="required"><span class="error">{{error_username}}</span>
-		<p><label for="password">Password</label>
-			<input type="password" name="password" value="" placeholder="required"><span class="error">{{error_password}}</span>
-	</fieldset>
-	<fieldset class="form-actions">
-		<input type="submit" class="btn" name="submit" value="Submit">
-	</fieldset>
+    <div class="row">
+        <div class="col-md-12 form_title">
+            <h3>User Sign In</h3>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 error">
+            {{error_password}}{{error_username}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="username">User Name</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="text" name="username" value="{{username}}" placeholder="required">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 field_label">
+            <label for="password">Password</label>
+        </div>
+        <div class="col-md-7 field">
+            <input type="password" name="password" value="" placeholder="required">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form_actions">
+            <input type="submit" class="btn" name="submit" value="Submit">
+        </div>
+    </div>
 </form>
 {% endblock content %}
