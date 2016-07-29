@@ -34,13 +34,13 @@
         </div>
     </div>
     <form method="post">
+        <!-- POSTS -->
         {% for post in posts %}
             <div class="row view">
                 <div class="col-sm-2">
                     <span>
                         <span class="glyphicon glyphicon-user" aria-hidden="true"></span> {{post.author_name}}
                     </span>
-
                 </div>
                 <div class="col-sm-3">
                     <a href="/open?id={{post.post_id}}">{{post.subject}}</a>

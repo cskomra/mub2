@@ -21,14 +21,14 @@ from google.appengine.ext import db
 
 
 # GLOBAL CONSTANTS
-TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
 JINJA_ENV = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATE_DIR),
                                autoescape=True)
 EMAIL_RE = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
-USER_ID = 'user_id'
-SECRET = 'cs9e3_JE!48b'
+USER_ID = "user_id"
+SECRET = "cs9e3_JE!48b"
 SALT_LENGTH = 5
 COOKIE_LIFE = 0
 
@@ -40,10 +40,10 @@ def get_user_id(self):
     return self.read_secure_cookie(USER_ID)
 
 
-def blog_key(name='default'):
+def blog_key(name="default"):
     """Gets and returns the key to the blog."""
 
-    return db.Key.from_path('Blog', name)
+    return db.Key.from_path("Blog", name)
 
 
 def render_str(template, **params):
@@ -119,7 +119,7 @@ class SecurityEngine(object):
             A value/hash pair.
         """
 
-        return '%s|%s' % (val, hmac.new(SECRET, val).hexdigest())
+        return "%s|%s" % (val, hmac.new(SECRET, val).hexdigest())
 
     def set_secure_cookie(self, name, val, expires):
         """Creates and sets cookie.
@@ -309,9 +309,9 @@ class LikeHandler(BlogEngine):
             like = Like(parent=parent_key,
                         liker=user.username)
             like.put()
-            self.redirect('/open?id=%s' % likable_id)
+            self.redirect("/open?id=%s" % likable_id)
         else:
-            self.redirect('/')
+            self.redirect("/login")
 
 
 class CommentHandler(BlogEngine):
@@ -323,7 +323,7 @@ class CommentHandler(BlogEngine):
             post_id = self.request.get("id")
             self.render("new_comment.html", post_id=post_id)
         else:
-            self.redirect('/')
+            self.redirect('/login')
 
     def post(self):
 
@@ -343,24 +343,24 @@ class CommentHandler(BlogEngine):
                 comment.post_id = post_id
                 comment.put()
                 time.sleep(.5)
-                self.redirect('/open?id=%s' % post_id)
+                self.redirect("/open?id=%s" % post_id)
             else:
                 error = "You forgot to add your comment!"
                 params = dict(error=error)
                 self.render("new_comment.html", **params)
         else:
-            self.redirect('/')
+            self.redirect("/login")
 
 
 class EditHandler(BlogEngine):
     """Handles edits."""
 
     def get(self):
-        the_id = self.request.get('id')
+        the_id = self.request.get("id")
         user = self.get_user_by_uid()
 
         if not user:
-            self.redirect('/login')
+            self.redirect("/login")
 
         if self.is_registered():
             if the_id != "None":
@@ -405,10 +405,10 @@ class EditHandler(BlogEngine):
 
     def post(self):
 
-        the_id = self.request.get('id')
+        the_id = self.request.get("id")
         user = self.get_user_by_uid()
         if the_id == "None" or not user or not self.is_registered:
-            self.redirect("/")
+            self.redirect("/login")
 
         the_key = db.Key(the_id)
         the_entity = self.get_entity(the_key)
@@ -469,23 +469,23 @@ class OpenHandler(BlogEngine):
 
             params = dict()
             # get/set params common to all Models
-            params['content'] = the_entity.content
-            params['author_name'] = author_name
-            params['created'] = the_entity.created
-            params['modified'] = the_entity.modified
+            params["content"] = the_entity.content
+            params["author_name"] = author_name
+            params["created"] = the_entity.created
+            params["modified"] = the_entity.modified
 
             is_editor = user and (user.username == author_name)
-            params['is_editor'] = is_editor
+            params["is_editor"] = is_editor
 
             # Open POST
             if the_entity.kind() == "Post":
-                params['post_id'] = the_entity.post_id
-                params['subject'] = the_entity.subject
+                params["post_id"] = the_entity.post_id
+                params["subject"] = the_entity.subject
 
                 comments = Comment.all()
                 comments.ancestor(the_key)
-                comments.order('-created')
-                params['comments'] = comments
+                comments.order("-created")
+                params["comments"] = comments
 
                 all_likes = Like.all()
                 likes = all_likes.ancestor(db.Key(the_entity.post_id))
@@ -505,7 +505,7 @@ class OpenHandler(BlogEngine):
 
             self.render(form, **params)
         else:
-            self.redirect('/')
+            self.redirect("/login")
 
 
 class DeleteHandler(BlogEngine):
@@ -521,16 +521,16 @@ class DeleteHandler(BlogEngine):
             auth_error = False
 
         if not auth_error:
-            the_id = self.request.get('id')
+            the_id = self.request.get("id")
             if the_id != "None":
                 the_key = db.Key(the_id)
                 db.delete(the_key)
                 time.sleep(.5)
-                self.redirect('/')
+                self.redirect("/")
             else:
-                self.redirect('/')
+                self.redirect("/login")
         else:
-            self.redirect('/signup')
+            self.redirect("/signup")
 
 
 class NewPostHandler(BlogEngine):
@@ -540,13 +540,13 @@ class NewPostHandler(BlogEngine):
         if self.read_secure_cookie(USER_ID):
             self.render("new_post.html")
         else:
-            self.redirect('/signup')
+            self.redirect("/signup")
 
     def post(self):
         user = self.get_user_by_uid()
         if user:
-            subject = self.request.get('subject')
-            content = self.request.get('content')
+            subject = self.request.get("subject")
+            content = self.request.get("content")
             if subject and content:
                 post = Post(parent=blog_key(),
                             author_id=self.read_secure_cookie(USER_ID),
@@ -563,7 +563,7 @@ class NewPostHandler(BlogEngine):
                 params = dict(subject=subject, content=content, error=error)
                 self.render("new_post.html", **params)
         else:
-            self.redirect('/')
+            self.redirect("/login")
 
 
 class LoginHandler(BlogEngine):
@@ -573,8 +573,8 @@ class LoginHandler(BlogEngine):
         self.render("login.html")
 
     def post(self):
-        username = self.request.get('username')
-        password = self.request.get('password')
+        username = self.request.get("username")
+        password = self.request.get("password")
 
         params = dict()
         if self.get_user(username):
@@ -582,10 +582,10 @@ class LoginHandler(BlogEngine):
                 auth_error = False
             else:
                 auth_error = True
-                params['error_password'] = 'Invalid Password'
+                params["error_password"] = "Invalid Password"
         else:
             auth_error = True
-            params['error_username'] = 'User Does Not Exist'
+            params["error_username"] = "User Does Not Exist"
 
         if auth_error:
             self.render("login.html", **params)
@@ -594,15 +594,15 @@ class LoginHandler(BlogEngine):
                                username=username).get()
             user_id = str(user.key().id())
             self.set_secure_cookie(USER_ID, user_id, None)
-            self.redirect('/')
+            self.redirect("/")
 
 
 class LogoutHandler(BlogEngine):
     """Handles a logout."""
 
     def get(self):
-        self.set_secure_cookie(USER_ID, '', None)
-        self.redirect('/login')
+        self.set_secure_cookie(USER_ID, "", None)
+        self.redirect("/login")
 
 
 class SignupHandler(BlogEngine):
@@ -624,34 +624,34 @@ class SignupHandler(BlogEngine):
             return True
 
     def get(self):
-        self.render('signup.html')
+        self.render("signup.html")
 
     def post(self):
         error = False
-        username = self.request.get('username')
-        password = self.request.get('password')
-        verify = self.request.get('verify')
-        email = self.request.get('email')
+        username = self.request.get("username")
+        password = self.request.get("password")
+        verify = self.request.get("verify")
+        email = self.request.get("email")
 
         params = dict(username=username, password=password, email=email)
 
         if self.get_user(username):
             error = True
-            params['error_username_exists'] = "User already exists."
+            params["error_username_exists"] = "User already exists."
         elif not self.username_isvalid(username):
             error = True
-            params['error_username'] = "Username is not valid"
+            params["error_username"] = "Username is not valid"
 
         if not self.password_isvalid(password):
             error = True
-            params['error_password'] = "Password is not valid."
+            params["error_password"] = "Password is not valid."
         elif password != verify:
             error = True
-            params['error_verify'] = "Passwords do not match."
+            params["error_verify"] = "Passwords do not match."
 
         if not self.email_isvalid(email):
             error = True
-            params['error_email'] = "Email is not valid."
+            params["error_email"] = "Email is not valid."
 
         if error:
             self.render("signup.html", **params)
@@ -663,7 +663,7 @@ class SignupHandler(BlogEngine):
             user.put()
             user_id = str(user.key().id())
             self.set_secure_cookie(USER_ID, user_id, None)
-            self.redirect('/')
+            self.redirect("/")
 
 
 class MainHandler(BlogEngine):
@@ -681,7 +681,7 @@ class MainHandler(BlogEngine):
         else:
             msg = "Please Signup or Login to Post!"
             params = dict(posts=posts, msg=msg)
-            self.render('blog_roll.html', **params)
+            self.render("blog_roll.html", **params)
 
 
 APP = webapp2.WSGIApplication([
