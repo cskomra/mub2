@@ -1,12 +1,21 @@
+""" This is a multi-user blog.
+
+    It allows many users to post blog entries. Users may post, comment,
+    and like blog posts.
+"""
+
+# Copyright(c) 2016 Connie Skomra
+
 import os
 import re
-import webapp2
-import jinja2
 import random
 from string import letters
 import hashlib
 import hmac
+import datetime
 import time
+import webapp2
+import jinja2
 
 from google.appengine.ext import db
 
@@ -20,31 +29,41 @@ USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
 PASS_RE = re.compile(r"^.{3,20}$")
 USER_ID = 'user_id'
 SECRET = 'cs9e3_JE!48b'
+SALT_LENGTH = 5
 COOKIE_LIFE = 0
 
 
 # GLOBAL FUNCTIONS
 def get_user_id(self):
+    """Gets and returns the user's id."""
 
-    # If logged in, returns user's cookie
     return self.read_secure_cookie(USER_ID)
 
 
 def blog_key(name='default'):
+    """Gets and returns the key to the blog."""
 
-    # Facilitiates multiple blogs
     return db.Key.from_path('Blog', name)
 
 
 def render_str(template, **params):
+    """Renders a given template with given parameters.
 
-    # Renders given template with given parameters
+    Args:
+        template: The template to render.
+        **params: One or more key pair parameters.
+
+    Returns:
+        A call to render the template with parameters.
+    """
+
     tmp = JINJA_ENV.get_template(template)
     return tmp.render(params)
 
 
 # DATA OBJECT DEFINITIONS
 class User(db.Model):
+    """Stores information about a user participating in the blog."""
 
     username = db.StringProperty(required=True)
     pass_hash = db.StringProperty(required=True)
@@ -52,6 +71,7 @@ class User(db.Model):
 
 
 class Post(db.Model):
+    "Stores information about a blog post."
 
     author_name = db.StringProperty(required=True)
     author_id = db.StringProperty(required=True)
@@ -63,6 +83,7 @@ class Post(db.Model):
 
 
 class Comment(db.Model):
+    """Stores information about a comment to a blog post."""
 
     author_name = db.StringProperty(required=True)
     author_id = db.StringProperty(required=True)
@@ -73,17 +94,45 @@ class Comment(db.Model):
 
 
 class Like(db.Model):
+    """Stores the username who likes something that is likable."""
 
     liker = db.StringProperty(required=True)
 
 
 # ENGINES
 class SecurityEngine(object):
+    """Performs functions relative to security."""
 
-    def make_secure_val(self, val):
+    @classmethod
+    def make_secure_val(cls, val):
+        """Create a secure value.
+
+        Combines a given value with a secret string to produce a secure value.
+        The secure value/string pair will be stored as a cookie and used later
+        to authenticate the user.
+
+        Args:
+            val: The user's id obtained at login or signup. Set val to empty
+                string to clear the cookie.
+
+        Returns:
+            A value/hash pair.
+        """
+
         return '%s|%s' % (val, hmac.new(SECRET, val).hexdigest())
 
     def set_secure_cookie(self, name, val, expires):
+        """Creates and sets cookie.
+
+        Called during login, signup, and logout.
+
+        Args:
+            name: The 'user_id' (A global constant.).
+            val: The user's id obtained at login or signup. Set val to empty
+                string to clear the cookie.
+            expires: When cookie expires. (Set to 0 for this blog).
+        """
+
         cookie_val = self.make_secure_val(str(val))
         if expires:
             now = datetime.datetime.utcnow()
@@ -96,6 +145,15 @@ class SecurityEngine(object):
             '%s=%s; expires=%s; Path=/' % (name, cookie_val, expires_on))
 
     def read_secure_cookie(self, cookie_name):
+        """ Reads a cookie.
+
+        Args:
+            cookie_name: The name of the cookie to read.
+
+        Returns:
+            The cookie that was read.
+        """
+
         if self.request.cookies.get(cookie_name):
             cookie = self.request.cookies.get(cookie_name)
             value = self.get_secure_val(cookie)
@@ -103,24 +161,59 @@ class SecurityEngine(object):
         else:
             return
 
-    def make_salt(self, salt_length=5):
+    @classmethod
+    def make_salt(cls):
+        """ Creates a random string.
+
+        Args:
+            salt_length: The length of the random string.
+
+        Returns:
+            The random string.
+        """
+
         return ''.join(random.choice(letters)
-                       for x in xrange(salt_length))
+                       for x in xrange(SALT_LENGTH))
 
     def hash_pass(self, username, password, salt=None):
+        """ Makes a hash from username, password, plus salt.
+
+        Args:
+            username: The user's username.
+            password: The user's password.
+            salt: A randomized string.
+
+        Returns:
+            The salt and hashed strings separated by a pipe ('|') symbol.
+        """
         if not salt:
             salt = self.make_salt()
         hashed_pass = hashlib.sha256(username + password + salt).hexdigest()
         return '%s|%s' % (salt, hashed_pass)
 
     def valid_pass_hash(self, username, password, hashed_pass):
+        """Uses the salt to test if the hash is valid.
+
+        Args:
+            username: The user's username.
+            password: The user's password.
+            hashed_pass: The user's hashed password.
+
+        Returns:
+            True if the given hash matches the user's hashed password.
+        """
         salt = hashed_pass.split('|')[0]
         return hashed_pass == self.hash_pass(username, password, salt)
 
-    def make_secure_val(self, val):
-        return '%s|%s' % (val, hmac.new(SECRET, val).hexdigest())
-
     def get_secure_val(self, secure_val):
+        """Uses a secure value/string pair to get the value part.
+
+        Args:
+            secure_val: The secure value/string pair.
+
+        Returns:
+            The value that was used to make a secure value/string pair.
+        """
         if secure_val:
             val = secure_val.split('|')[0]
         else:
@@ -129,6 +222,8 @@ class SecurityEngine(object):
             return val
 
     def get_user_by_uid(self):
+        """Returns the user's id."""
+
         user_id = self.read_secure_cookie(USER_ID)
         if user_id:
             user_key = db.Key.from_path('User', int(user_id), parent=None)
@@ -136,21 +231,24 @@ class SecurityEngine(object):
         else:
             return None
 
-    def get_user(self, username):
-        user = db.GqlQuery("SELECT * "
-                          "FROM User "
-                          "WHERE username = :un",
-                          un=username).get()
-        return user
+    @classmethod
+    def get_user(cls, username):
+        """Returns the user object."""
+
+        return db.GqlQuery("SELECT * FROM User WHERE username = :un", un=username).get()
 
     def user_auth(self, username, password):
+        """Returns T/F if the user is securely authorized."""
+
         user = self.get_user(username)
         if user:
             return self.valid_pass_hash(user.username,
                                         password,
                                         user.pass_hash)
 
-    def is_authorized(self):
+    def is_registered(self):
+        """Returns T/F if the username is a registered user."""
+
         authorized = False
         username = self.read_secure_cookie(USER_ID)
         if username:
@@ -161,14 +259,22 @@ class SecurityEngine(object):
 
 
 class BlogEngine(webapp2.RequestHandler, SecurityEngine):
+    """Handles activities pertinent to rendering blog data."""
 
     def write(self, *a, **kw):
+        """Writes to the browser."""
+
         self.response.out.write(*a, **kw)
 
-    def render_tmp(self, template, **params):
+    @classmethod
+    def render_tmp(cls, template, **params):
+        """Renders a template with one or more parameters."""
+
         return render_str(template, **params)
 
     def render(self, template, **kw):
+        """Sends username and renders template with one or more keyword pairs."""
+
         user = None
         user = self.get_user_by_uid()
         if user:
@@ -176,25 +282,32 @@ class BlogEngine(webapp2.RequestHandler, SecurityEngine):
         else:
             self.write(self.render_tmp(template, **kw))
 
-    def save_entity(self, the_entity):
+    @classmethod
+    def save_entity(cls, the_entity):
+        """Saves and entity and returns its key."""
+
         entity_key = the_entity.put()
         return entity_key
 
-    def get_entity(self, entity_key):
+    @classmethod
+    def get_entity(cls, entity_key):
+        """Given a key, gets its entity."""
+
         return db.get(entity_key)
 
 
 # HANDLERS
 class LikeHandler(BlogEngine):
+    """Handles a Like."""
 
     def get(self):
         user = self.get_user_by_uid()
         if user:
             likable_id = self.request.get("id")
             parent_key = db.Key(likable_id)
-            #create new Like as child to likable parent
+
             like = Like(parent=parent_key,
-                        liker = user.username)
+                        liker=user.username)
             like.put()
             self.redirect('/open?id=%s' % likable_id)
         else:
@@ -202,6 +315,7 @@ class LikeHandler(BlogEngine):
 
 
 class CommentHandler(BlogEngine):
+    "Handles Comments."
 
     def get(self):
         user = self.get_user_by_uid()
@@ -212,6 +326,7 @@ class CommentHandler(BlogEngine):
             self.redirect('/')
 
     def post(self):
+
         user = self.get_user_by_uid()
         if user:
             post_id = self.request.get("id")
@@ -219,11 +334,10 @@ class CommentHandler(BlogEngine):
 
             if content.strip() != "":
                 parent_key = db.Key(post_id)
-                parent_post = self.get_entity(parent_key)
                 comment = Comment(parent=parent_key,
-                                author_id=self.read_secure_cookie(USER_ID),
-                                author_name=user.username,
-                                content=content)
+                                  author_id=self.read_secure_cookie(USER_ID),
+                                  author_name=user.username,
+                                  content=content)
                 comment_key = self.save_entity(comment)
                 comment.comment_id = str(comment_key)
                 comment.post_id = post_id
@@ -231,7 +345,7 @@ class CommentHandler(BlogEngine):
                 time.sleep(.5)
                 self.redirect('/open?id=%s' % post_id)
             else:
-                error = "But you didn't type anything!"
+                error = "You forgot to add your comment!"
                 params = dict(error=error)
                 self.render("new_comment.html", **params)
         else:
@@ -239,115 +353,116 @@ class CommentHandler(BlogEngine):
 
 
 class EditHandler(BlogEngine):
+    """Handles edits."""
 
     def get(self):
         the_id = self.request.get('id')
         user = self.get_user_by_uid()
-        if user:
-            if self.is_authorized():
-                if the_id != "None":
-                    the_key = db.Key(the_id)
-                    the_entity = self.get_entity(the_key)
-                    if the_entity:
-                        # Check if is_editor
-                        if the_entity.author_name == user.username:
 
-                            # params common to all documents
-                            content = the_entity.content
-                            author_name = the_entity.author_name
-                            created = the_entity.created
-                            modified = the_entity.modified
-                            params = dict(content=content,
-                                            author_name=author_name,
-                                            created=created,
-                                            modified=modified)
-
-                            # Edit a Post
-                            if the_entity.kind() == "Post":
-                                subject = the_entity.subject
-                                params["subject"] = subject
-                                form = "new_post.html"
-
-                            # Edit a Comment
-                            elif the_entity.kind() == "Comment":
-                                form = "new_comment.html"
-
-                            else:
-                                self.write("Error: Entity kind needs handler")
-
-                            self.render(form, **params)
-                        else:
-                            self.write("Error: Not an editor.")
-                    else:
-                        self.write("Error: Don't have the entity")
-                else:
-                    self.write("Error: the_id = None")
-            else:
-                self.write("Error: Not authorized")
-        else:
-            # Error: No User
+        if not user:
             self.redirect('/login')
 
-    def post(self):
-        the_id = self.request.get('id')
-        user = self.get_user_by_uid()
-        if user and self.is_authorized():
+        if self.is_registered():
             if the_id != "None":
                 the_key = db.Key(the_id)
                 the_entity = self.get_entity(the_key)
                 if the_entity:
-                    # Check if is_editor
+
                     if the_entity.author_name == user.username:
-                        validation_error = False
 
-                        # get/set editable params common to all kinds
-                        content = self.request.get("content")
-                        the_entity.content = content
-                        kind = the_entity.kind()
+                        # params common to all documents
+                        content = the_entity.content
+                        author_name = the_entity.author_name
+                        created = the_entity.created
+                        modified = the_entity.modified
+                        params = dict(content=content,
+                                      author_name=author_name,
+                                      created=created,
+                                      modified=modified)
 
-                        # POST
-                        if kind == "Post":
-                            subject = self.request.get("subject")
-                            the_entity.subject = subject
-                            # validate and save/error
-                            if subject.strip() != "" and content.strip() != "":
-                                the_entity.put()
-                                time.sleep(.5)
-                                self.redirect("/")
-                            else:
-                                error = "Please include both title and content."
-                                params = dict(subject=subject, content=content, error=error)
-                                self.render("new_post.html", **params)
+                        # Edit POST
+                        if the_entity.kind() == "Post":
+                            subject = the_entity.subject
+                            params["subject"] = subject
+                            form = "new_post.html"
 
-                        # COMMENT
-                        elif kind == "Comment":
-                            if content.strip() != "":
-                                the_entity.put()
-                                post_id = the_entity.key().parent()
-                                time.sleep(.5)
-                                self.redirect("/open?id=%s" % str(post_id))
-                            else:
-                                error = "Please include content."
-                                params = dict(content=content, error=error)
-                                self.render("new_comment.html", **params)
+                        # Edit COMMENT
+                        elif the_entity.kind() == "Comment":
+                            form = "new_comment.html"
 
                         else:
-                            self.write("Error: Entity kind needs a handler")
+                            self.write("Error: Entity kind needs handler")
+
+                        self.render(form, **params)
                     else:
-                        self.write("Error: Not an Editor.")
+                        self.write("Error: Not an editor.")
                 else:
                     self.write("Error: Don't have the entity")
             else:
                 self.write("Error: the_id = None")
+        else:
+            self.write("Error: Not authorized")
+
+    def post(self):
+
+        the_id = self.request.get('id')
+        user = self.get_user_by_uid()
+        if the_id == "None" or not user or not self.is_registered:
+            self.redirect("/")
+
+        the_key = db.Key(the_id)
+        the_entity = self.get_entity(the_key)
+
+        if the_entity:
+            # Check if is_editor
+            if the_entity.author_name == user.username:
+
+                # get/set editable params common to all kinds
+                content = self.request.get("content")
+                the_entity.content = content
+                kind = the_entity.kind()
+
+                # POST
+                if kind == "Post":
+                    subject = self.request.get("subject")
+                    the_entity.subject = subject
+                    # validate and save/error
+                    if subject.strip() != "" and content.strip() != "":
+                        the_entity.put()
+                        time.sleep(.5)
+                        self.redirect("/")
+                    else:
+                        error = "Please include both title and content."
+                        params = dict(subject=subject, content=content, error=error)
+                        self.render("new_post.html", **params)
+
+                # COMMENT
+                elif kind == "Comment":
+                    if content.strip() != "":
+                        the_entity.put()
+                        post_id = the_entity.key().parent()
+                        time.sleep(.5)
+                        self.redirect("/open?id=%s" % str(post_id))
+                    else:
+                        error = "Please include content."
+                        params = dict(content=content, error=error)
+                        self.render("new_comment.html", **params)
+
+                else:
+                    self.write("Error: Entity kind needs a handler")
+            else:
+                self.write("Error: Not an Editor.")
+        else:
+            self.write("Error: Don't have the entity")
 
 
 class OpenHandler(BlogEngine):
+    "Handles opening (viewing) entities."
 
     def get(self):
         user = self.get_user_by_uid()
         the_id = self.request.get("id")
         if the_id != "None":
-            # get the entity and its author name
             the_key = db.Key(the_id)
             the_entity = db.get(the_key)
             author_name = the_entity.author_name
@@ -359,14 +474,10 @@ class OpenHandler(BlogEngine):
             params['created'] = the_entity.created
             params['modified'] = the_entity.modified
 
-            # determine and set is_editor
-            if user and (user.username == author_name):
-                is_editor = True
-            else:
-                is_editor = False
+            is_editor = user and (user.username == author_name)
             params['is_editor'] = is_editor
 
-            # POST
+            # Open POST
             if the_entity.kind() == "Post":
                 params['post_id'] = the_entity.post_id
                 params['subject'] = the_entity.subject
@@ -385,7 +496,7 @@ class OpenHandler(BlogEngine):
                 params["likers"] = likers
                 params["like_count"] = like_count
                 form = "post.html"
-            # COMMENT
+            # Open COMMENT
             elif the_entity.kind() == "Comment":
                 params["comment_id"] = the_entity.comment_id
                 form = "comment.html"
@@ -398,6 +509,7 @@ class OpenHandler(BlogEngine):
 
 
 class DeleteHandler(BlogEngine):
+    """Handles deletes."""
 
     def get(self):
         auth_error = True
@@ -422,6 +534,7 @@ class DeleteHandler(BlogEngine):
 
 
 class NewPostHandler(BlogEngine):
+    """Handles a new post."""
 
     def get(self):
         if self.read_secure_cookie(USER_ID):
@@ -435,7 +548,7 @@ class NewPostHandler(BlogEngine):
             subject = self.request.get('subject')
             content = self.request.get('content')
             if subject and content:
-                post = Post( parent=blog_key(),
+                post = Post(parent=blog_key(),
                             author_id=self.read_secure_cookie(USER_ID),
                             author_name=user.username,
                             subject=subject,
@@ -454,12 +567,12 @@ class NewPostHandler(BlogEngine):
 
 
 class LoginHandler(BlogEngine):
+    "Handles a login."
 
     def get(self):
         self.render("login.html")
 
     def post(self):
-        error = False
         username = self.request.get('username')
         password = self.request.get('password')
 
@@ -477,9 +590,7 @@ class LoginHandler(BlogEngine):
         if auth_error:
             self.render("login.html", **params)
         else:
-            user = db.GqlQuery("SELECT * "
-                               "FROM User "
-                               "WHERE username = :username",
+            user = db.GqlQuery("SELECT * FROM User WHERE username = :username",
                                username=username).get()
             user_id = str(user.key().id())
             self.set_secure_cookie(USER_ID, user_id, None)
@@ -487,6 +598,7 @@ class LoginHandler(BlogEngine):
 
 
 class LogoutHandler(BlogEngine):
+    """Handles a logout."""
 
     def get(self):
         self.set_secure_cookie(USER_ID, '', None)
@@ -494,14 +606,18 @@ class LogoutHandler(BlogEngine):
 
 
 class SignupHandler(BlogEngine):
+    """Handles a signup."""
 
-    def username_isValid(self, username):
+    @classmethod
+    def username_isvalid(cls, username):
         return username and USER_RE.match(username)
 
-    def password_isValid(self, password):
+    @classmethod
+    def password_isvalid(cls, password):
         return password and PASS_RE.match(password)
 
-    def email_isValid(self, email):
+    @classmethod
+    def email_isvalid(cls, email):
         if email:
             return EMAIL_RE.match(email)
         else:
@@ -522,18 +638,18 @@ class SignupHandler(BlogEngine):
         if self.get_user(username):
             error = True
             params['error_username_exists'] = "User already exists."
-        elif not self.username_isValid(username):
+        elif not self.username_isvalid(username):
             error = True
             params['error_username'] = "Username is not valid"
 
-        if not self.password_isValid(password):
+        if not self.password_isvalid(password):
             error = True
             params['error_password'] = "Password is not valid."
         elif password != verify:
             error = True
             params['error_verify'] = "Passwords do not match."
 
-        if not self.email_isValid(email):
+        if not self.email_isvalid(email):
             error = True
             params['error_email'] = "Email is not valid."
 
@@ -551,6 +667,7 @@ class SignupHandler(BlogEngine):
 
 
 class MainHandler(BlogEngine):
+    """Handles the main blog roll home page."""
 
     def get(self):
         user = None
@@ -567,7 +684,7 @@ class MainHandler(BlogEngine):
             self.render('blog_roll.html', **params)
 
 
-app = webapp2.WSGIApplication([
+APP = webapp2.WSGIApplication([
     ('/', MainHandler),
     ('/signup', SignupHandler),
     ('/logout', LogoutHandler),

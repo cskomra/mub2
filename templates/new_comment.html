@@ -34,7 +34,11 @@
         <div class="row form_actions">
             <div class="col-md-12">
                 <input type="submit" class="btn" name="submit" value="Submit">
-                <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
+                {% if error %}
+                    <input type="button" class="btn" value="Cancel" onClick="window.history.go(-2)">
+                {% else %}
+                    <input type="button" class="btn" value="Cancel" onClick="window.history.go(-1)">
+                {% endif %}
             </div>
         </div>
         <div class="row doc_info">
